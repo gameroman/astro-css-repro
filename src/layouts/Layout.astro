@@ -1,0 +1,20 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  children: unknown;
+}
+
+const { title } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <title>{title}</title>
+  </head>
+
+  <body>
+    <slot />
+  </body>
+</html>

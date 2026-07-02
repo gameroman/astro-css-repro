@@ -1,0 +1,11 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const id = Astro.params.id;
+---
+
+<Layout title={id}>
+  <main class="flex-1 container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8 truncate">{id}</h1>
+  </main>
+</Layout>

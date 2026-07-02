@@ -1,0 +1,17 @@
+{
+  "name": "@gameroman/astro-css-repro",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "astro build"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "14.1.0",
+    "@tailwindcss/vite": "4.3.2",
+    "astro": "7.0.5",
+    "tailwindcss": "4.3.2"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
