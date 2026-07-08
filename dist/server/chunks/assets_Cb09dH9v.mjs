@@ -1,6 +1,6 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { d as joinPaths, h as removeQueryString, t as isRemoteAllowed, u as isRemotePath } from "./remote_fyhx_vxk.mjs";
+import { d as joinPaths, h as removeQueryString, t as isRemoteAllowed, u as isRemotePath } from "./remote_BKlHCiWv.mjs";
 import { H as RemoteImageNotAllowed, P as NoImageMetadata, Q as UnsupportedImageFormat, T as LocalImageUsedWrongly, Z as UnsupportedImageConversion, b as IncompatibleDescriptorOptions, d as ExpectedNotESMImage, f as FailedToFetchRemoteImageDimensions, j as MissingImageDimension, l as ExpectedImage, n as AstroError, t as shorthash, u as ExpectedImageOptions, w as InvalidImageService } from "./shorthash_CHw-S7Ke.mjs";
 //#region node_modules/astro/dist/assets/consts.js
 var VALID_SUPPORTED_FORMATS = [
@@ -1304,7 +1304,7 @@ var cssFitValues = [
 ];
 async function getConfiguredImageService() {
 	if (!globalThis?.astroAsset?.imageService) {
-		const { default: service } = await import("./image-service-workerd_DESbxlE8.mjs").catch((e) => {
+		const { default: service } = await import("./image-service-workerd_D92jw32H.mjs").catch((e) => {
 			const error = new AstroError(InvalidImageService);
 			error.cause = e;
 			throw error;
@@ -1558,4 +1558,4 @@ function hashTransform(transform, imageService, propertiesToHash) {
 	}, { imageService })));
 }
 //#endregion
-export { fetchWithRedirects as a, baseService as i, propsToFilename as n, isESMImportedImage as o, getImage as r, resolveSrc as s, hashTransform as t };
+export { baseService as a, isESMImportedImage as c, getImage as i, isRemoteImage as l, propsToFilename as n, inferRemoteSize as o, getConfiguredImageService as r, fetchWithRedirects as s, hashTransform as t, resolveSrc as u };

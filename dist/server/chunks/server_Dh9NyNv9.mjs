@@ -1582,7 +1582,7 @@ var optionalProcessor = (schema, ctx, _json, params) => {
 	const seen = ctx.seen.get(schema);
 	seen.ref = def.innerType;
 };
-var ASTRO_GENERATOR = `Astro v7.0.5`;
+var ASTRO_GENERATOR = `Astro v7.0.6`;
 var ASTRO_ERROR_HEADER = "X-Astro-Error";
 var DEFAULT_404_COMPONENT = "astro-default-404.astro";
 var REDIRECT_STATUS_CODES = [
@@ -2180,6 +2180,9 @@ function createRenderInstruction(instruction) {
 }
 function isRenderInstruction(chunk) {
 	return chunk && typeof chunk === "object" && chunk[RenderInstructionSymbol];
+}
+function isScriptInstruction(chunk) {
+	return chunk && typeof chunk === "object" && "type" in chunk && chunk.type === "script";
 }
 //#endregion
 //#region node_modules/astro/dist/runtime/server/render/util.js
@@ -3076,10 +3079,18 @@ function renderTemplate(htmlParts, ...expressions) {
 var slotString = /* @__PURE__ */ Symbol.for("astro:slot-string");
 var SlotString = class extends HTMLString {
 	instructions;
+	/**
+	* The slot's content as an ordered stream. Unlike `instructions` (which holds
+	* position-independent instructions like head/hydration content), scripts are
+	* kept inline here so they render at their original position instead of being
+	* hoisted to the start of the slot output.
+	*/
+	chunks;
 	[slotString];
-	constructor(content, instructions) {
+	constructor(content, instructions, chunks = []) {
 		super(content);
 		this.instructions = instructions;
+		this.chunks = chunks;
 		this[slotString] = true;
 	}
 };
@@ -3102,17 +3113,25 @@ function renderSlot(result, slotted, fallback) {
 async function renderSlotToString(result, slotted, fallback) {
 	let content = "";
 	let instructions = null;
+	const chunks = [];
 	await renderSlot(result, slotted, fallback).render({ write(chunk) {
 		if (chunk instanceof SlotString) {
 			content += chunk;
+			if (chunk.chunks.length) chunks.push(...chunk.chunks);
 			instructions = mergeSlotInstructions(instructions, chunk);
 		} else if (chunk instanceof Response) return;
-		else if (typeof chunk === "object" && "type" in chunk && typeof chunk.type === "string") {
+		else if (typeof chunk === "object" && "type" in chunk && typeof chunk.type === "string") if (isScriptInstruction(chunk)) chunks.push(chunk);
+		else {
 			if (instructions === null) instructions = [];
 			instructions.push(chunk);
-		} else content += chunkToString(result, chunk);
+		}
+		else {
+			const str = chunkToString(result, chunk);
+			content += str;
+			chunks.push(str);
+		}
 	} });
-	return markHTMLString(new SlotString(content, instructions));
+	return markHTMLString(new SlotString(content, instructions, chunks));
 }
 async function renderSlots(result, slots = {}) {
 	let slotInstructions = null;
@@ -3121,6 +3140,12 @@ async function renderSlots(result, slots = {}) {
 		if (output.instructions) {
 			if (slotInstructions === null) slotInstructions = [];
 			slotInstructions.push(...output.instructions);
+		}
+		if (output.chunks) {
+			for (const part of output.chunks) if (typeof part !== "string") {
+				if (slotInstructions === null) slotInstructions = [];
+				slotInstructions.push(part);
+			}
 		}
 		children[key] = output;
 	})));
@@ -3216,11 +3241,10 @@ var ServerIslandComponent = class {
 		const renderedSlots = {};
 		for (const name in this.slots) if (name !== "fallback") {
 			const content = await renderSlotToString(this.result, this.slots[name]);
-			let slotHtml = content.toString();
 			const slotContent = content;
-			if (Array.isArray(slotContent.instructions)) {
-				for (const instruction of slotContent.instructions) if (instruction.type === "script") slotHtml += instruction.content;
-			}
+			let slotHtml = "";
+			if (slotContent.chunks?.length) for (const part of slotContent.chunks) slotHtml += typeof part === "string" ? part : part.content;
+			else slotHtml = content.toString();
 			renderedSlots[name] = slotHtml;
 		}
 		const key = await this.result.key;
@@ -3331,7 +3355,8 @@ function stringifyChunk(result, chunk) {
 		let out = "";
 		const c = chunk;
 		if (c.instructions) for (const instr of c.instructions) out += stringifyChunk(result, instr);
-		out += chunk.toString();
+		if (c.chunks.length) for (const part of c.chunks) out += typeof part === "string" ? part : stringifyChunk(result, part);
+		else out += chunk.toString();
 		return out;
 	}
 	return chunk.toString();
@@ -3866,7 +3891,10 @@ function componentIsHTMLElement(Component) {
 async function renderHTMLElement(result, constructor, props, slots) {
 	const name = getHTMLElementName(constructor);
 	let attrHTML = "";
-	for (const attr in props) attrHTML += ` ${attr}="${toAttributeString(await props[attr])}"`;
+	for (const attr in props) {
+		if (INVALID_ATTR_NAME_CHAR.test(attr)) continue;
+		attrHTML += ` ${attr}="${toAttributeString(await props[attr])}"`;
+	}
 	return markHTMLString(`<${name}${attrHTML}>${await renderSlotToString(result, slots?.default)}</${name}>`);
 }
 function getHTMLElementName(constructor) {

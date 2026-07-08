@@ -1,7 +1,7 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { d as joinPaths, f as prependForwardSlash, p as removeBase } from "./remote_fyhx_vxk.mjs";
-import { n as propsToFilename, o as isESMImportedImage, t as hashTransform } from "./assets_CAeSya_J.mjs";
+import { d as joinPaths, f as prependForwardSlash, p as removeBase } from "./remote_BKlHCiWv.mjs";
+import { c as isESMImportedImage, n as propsToFilename, t as hashTransform } from "./assets_Cb09dH9v.mjs";
 //#region node_modules/@astrojs/cloudflare/dist/utils/static-image-collection.js
 function installAddStaticImage(config) {
 	if (globalThis.astroAsset?.addStaticImage) return;

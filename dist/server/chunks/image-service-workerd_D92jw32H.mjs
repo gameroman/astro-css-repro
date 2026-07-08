@@ -1,6 +1,6 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { i as baseService } from "./assets_CAeSya_J.mjs";
+import { a as baseService } from "./assets_Cb09dH9v.mjs";
 //#region node_modules/@astrojs/cloudflare/dist/entrypoints/image-service-workerd.js
 var image_service_workerd_default = {
 	...baseService,

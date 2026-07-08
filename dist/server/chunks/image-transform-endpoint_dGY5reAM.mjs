@@ -1,10 +1,10 @@
 globalThis.process ??= {};
 globalThis.process.env ??= {};
-import { S as createComponent, g as addAttribute, m as maybeRenderHead, t as spreadAttributes, u as renderTemplate, x as createAstro, y as unescapeHTML, z as __exportAll } from "./server_DA01noJy.mjs";
-import { t as isRemoteAllowed, u as isRemotePath } from "./remote_fyhx_vxk.mjs";
+import { S as createComponent, g as addAttribute, m as maybeRenderHead, t as spreadAttributes, u as renderTemplate, x as createAstro, y as unescapeHTML, z as __exportAll } from "./server_Dh9NyNv9.mjs";
+import { t as isRemoteAllowed, u as isRemotePath } from "./remote_BKlHCiWv.mjs";
 import { A as MissingGetFontFileRequestUrl, n as AstroError, p as FontFamilyNotFound, y as ImageMissingAlt } from "./shorthash_CHw-S7Ke.mjs";
-import { a as fetchWithRedirects, o as isESMImportedImage, r as getImage$1, s as resolveSrc } from "./assets_CAeSya_J.mjs";
-import "./compiler_C0eth4BQ.mjs";
+import { c as isESMImportedImage, i as getImage$1, l as isRemoteImage, o as inferRemoteSize$1, r as getConfiguredImageService, s as fetchWithRedirects, u as resolveSrc } from "./assets_Cb09dH9v.mjs";
+import "./compiler_ClO7C5C9.mjs";
 import { env } from "cloudflare:workers";
 //#region node_modules/astro/components/Image.astro
 createAstro("https://astro.build");
@@ -509,6 +509,12 @@ var $$Picture = createComponent(async ($$result, $$props, $$slots) => {
 	}
 	for (const key in props) if (key.startsWith("data-astro-cid")) pictureAttributes[key] = props[key];
 	const originalSrc = await resolveSrc(props.src);
+	if (props.inferSize && isRemoteImage(originalSrc)) {
+		const remoteSize = await inferRemoteSize(originalSrc);
+		delete props.inferSize;
+		props.width ??= remoteSize.width;
+		props.height ??= remoteSize.height;
+	}
 	const optimizedImages = await Promise.all(formats.map(async (format) => await getImage({
 		...props,
 		src: originalSrc,
@@ -630,6 +636,9 @@ Object.defineProperty(imageConfig, "assetQueryParams", {
 	enumerable: false,
 	configurable: true
 });
+var inferRemoteSize = async (url) => {
+	return (await getConfiguredImageService()).getRemoteSize?.(url, imageConfig) ?? inferRemoteSize$1(url, imageConfig);
+};
 var getImage = async (options) => await getImage$1(options, imageConfig);
 //#endregion
 //#region node_modules/@astrojs/cloudflare/dist/utils/image-binding-transform.js

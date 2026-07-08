@@ -42,7 +42,8 @@ var INTERNAL_PREFIXES = /* @__PURE__ */ new Set([
 ]);
 var JUST_SLASHES = /^\/{2,}$/;
 function isInternalPath(path) {
-	return INTERNAL_PREFIXES.has(path.slice(0, 2)) && !JUST_SLASHES.test(path);
+	const prefix = path.slice(0, 2).replace(/\\/g, "/");
+	return INTERNAL_PREFIXES.has(prefix) && !JUST_SLASHES.test(path);
 }
 function joinPaths(...paths) {
 	return paths.filter(isString).map((path, i) => {
